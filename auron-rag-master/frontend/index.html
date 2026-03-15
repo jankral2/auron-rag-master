@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auron - Intranet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --auron-dark: #1e3a8a;
+            --auron-accent: #3b82f6;
+            --auron-gray: #f2f4f6;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--auron-gray); color: #333; }
+
+        /* Navigace */
+        .nav-item { position: relative; cursor: pointer; transition: color 0.3s; }
+        .nav-item::after { content: ''; position: absolute; width: 0; height: 3px; bottom: -5px; left: 0; background-color: var(--auron-accent); transition: width 0.3s; }
+        .nav-item:hover::after, .nav-item.active::after { width: 100%; }
+
+        /* Sekce */
+        .content-section { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Karty */
+        .card { background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+        /* Chat */
+        .chat-message { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .typing-indicator span { display: inline-block; width: 6px; height: 6px; background-color: #3b82f6; border-radius: 50%; margin: 0 1px; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        /* Article body */
+        .article-body { white-space: pre-wrap; line-height: 1.8; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white py-4 px-6 md:px-12 border-b border-gray-200">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 text-[#1e3a8a] text-3xl cursor-pointer" onclick="showSection('dashboard')">
+                <span class="font-extrabold tracking-tighter">AURON</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-gray-600">
+                <div class="hidden md:flex items-center bg-gray-100 px-3 py-1.5 rounded-full">
+                    <i class="fas fa-search mr-2 text-gray-400"></i>
+                    <input type="text" placeholder="Hledat na intranetu..." class="bg-transparent outline-none text-gray-700 w-48">
+                </div>
+                <div class="flex items-center gap-2 cursor-pointer hover:text-[#1e3a8a]">
+                    <div class="w-8 h-8 bg-[#1e3a8a] text-white rounded-full flex items-center justify-center font-bold">JD</div>
+                    <span class="hidden md:inline font-medium">Jan Dvořák</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigace -->
+    <nav class="bg-[#1e3a8a] text-white sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="md:hidden flex justify-between items-center py-3">
+                <span class="font-bold">Menu</span>
+                <button onclick="toggleMobileMenu()" class="focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+            </div>
+            <ul id="main-menu" class="hidden md:flex flex-col md:flex-row md:space-x-8 text-sm font-medium py-4 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <li class="nav-item active" onclick="showSection('dashboard', this)">Domů</li>
+                <li class="nav-item" onclick="showSection('o-spolecnosti', this)">O společnosti</li>
+                <li class="nav-item" onclick="showSection('organizace', this)">Organizace</li>
+                <li class="nav-item" onclick="showSection('pracovni-informace', this)">Pracovní informace</li>
+                <li class="nav-item" onclick="showSection('zivot-a-kariera', this)">Život a kariéra</li>
+                <li class="nav-item" onclick="showSection('sluzby', this)">Služby</li>
+                <li class="nav-item" onclick="showSection('odmenovani', this)">Odměňování a benefity</li>
+                <li class="nav-item" onclick="showSection('strategie', this)">Strategie</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Obsah -->
+    <main class="flex-grow container mx-auto px-4 md:px-8 py-8">
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="content-section active">
+            <!-- Banner -->
+            <div class="bg-gradient-to-r from-[#1e3a8a] to-[#172554] rounded-2xl p-8 text-white mb-8 shadow-lg relative overflow-hidden">
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-bold mb-2">Vítejte v Auron, Jane.</h1>
+                    <p class="text-gray-200 max-w-2xl">Zde naleznete nejnovější informace. Dnes je 23. května, ve výrobě běží směna B.</p>
+                </div>
+                <i class="fas fa-car absolute -right-10 -bottom-10 text-9xl text-white opacity-10"></i>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="md:col-span-2 space-y-6">
+
+                    <!-- AURON GPT WIDGET -->
+                    <div class="card p-6 border-l-4 border-blue-600 bg-white transition-all duration-300" id="gpt-container">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-brain text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">Auron GPT</h3>
+                                    <p class="text-xs text-gray-500">Váš interní AI asistent</p>
+                                </div>
+                            </div>
+                            <button onclick="clearChat()" class="text-xs text-gray-400 hover:text-red-500" title="Vymazat konverzaci"><i class="fas fa-trash"></i></button>
+                        </div>
+
+                        <!-- Oblast pro odpovědi -->
+                        <div id="chat-output" class="hidden mb-4 space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar text-sm"></div>
+
+                        <!-- Vstup -->
+                        <div class="relative">
+                            <input type="text" id="gpt-input"
+                                placeholder="Zeptejte se na směny, menu nebo interní směrnice..."
+                                class="w-full bg-gray-50 border border-gray-300 rounded-lg py-3 px-4 pr-12 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
+                                onkeypress="handleEnter(event)">
+                            <button onclick="handleAuronGPT()" id="gpt-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-800 p-2 cursor-pointer transition-colors">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Aktuality -->
+                    <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3">Aktuality</h2>
+                    <div id="aktuality-cards" class="space-y-4"></div>
+                </div>
+
+                <!-- Rychlé odkazy (Sidebar) -->
+                <div class="space-y-6">
+                    <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3">Rychlé odkazy</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="card p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50">
+                            <i class="fas fa-utensils text-2xl text-[#1e3a8a] mb-2"></i>
+                            <span class="text-sm font-medium">Jídelna</span>
+                        </div>
+                        <div class="card p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50">
+                            <i class="fas fa-bus text-2xl text-[#1e3a8a] mb-2"></i>
+                            <span class="text-sm font-medium">Doprava</span>
+                        </div>
+                        <div class="card p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50">
+                            <i class="fas fa-user-clock text-2xl text-[#1e3a8a] mb-2"></i>
+                            <span class="text-sm font-medium">Docházka</span>
+                        </div>
+                        <div class="card p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-blue-50">
+                            <i class="fas fa-headset text-2xl text-[#1e3a8a] mb-2"></i>
+                            <span class="text-sm font-medium">IT Help</span>
+                        </div>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="font-bold text-gray-800 mb-3">Dnešní menu - Eurest</h3>
+                        <ul class="space-y-2 text-sm text-gray-600">
+                            <li class="flex justify-between"><span>Svíčková na smetaně</span> <span class="font-bold text-[#1e3a8a]">85 Kč</span></li>
+                            <li class="flex justify-between"><span>Guláš s knedlíkem</span> <span class="font-bold text-[#1e3a8a]">79 Kč</span></li>
+                            <li class="flex justify-between"><span>Veganské kari</span> <span class="font-bold text-[#1e3a8a]">92 Kč</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- O SPOLEČNOSTI — Marketing -->
+        <div id="o-spolecnosti" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">O společnosti</h2>
+            <div id="cards-o-spolecnosti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ORGANIZACE — Správa majetku -->
+        <div id="organizace" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Organizace</h2>
+            <div id="cards-organizace" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- PRACOVNÍ INFORMACE — Výroba, Nákup -->
+        <div id="pracovni-informace" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Pracovní informace</h2>
+            <div id="cards-pracovni-informace" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ŽIVOT A KARIÉRA — Personální informace -->
+        <div id="zivot-a-kariera" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Život a kariéra</h2>
+            <div id="cards-zivot-a-kariera" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- SLUŽBY — IT, IT Provoz -->
+        <div id="sluzby" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Služby</h2>
+            <div id="cards-sluzby" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ODMĚŇOVÁNÍ A BENEFITY — Investice -->
+        <div id="odmenovani" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Odměňování a benefity</h2>
+            <div id="cards-odmenovani" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- STRATEGIE — Vývoj -->
+        <div id="strategie" class="content-section">
+            <h2 class="text-xl font-bold text-[#1e3a8a] border-l-4 border-[#3b82f6] pl-3 mb-6">Strategie</h2>
+            <div id="cards-strategie" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- ARTICLE DETAIL (hash routing target) -->
+        <div id="article-detail" class="content-section">
+            <button onclick="goBack()" class="flex items-center gap-2 text-[#1e3a8a] hover:underline font-medium mb-4">
+                <i class="fas fa-arrow-left"></i> Zpět
+            </button>
+            <div id="article-content" class="card p-8"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-8 mt-8">
+        <div class="container mx-auto px-4 text-center text-xs text-gray-400">
+            &copy; 2025 Auron Motors a.s. - Internal use only
+        </div>
+    </footer>
+
+    <!-- Static article data -->
+    <script src="data.js"></script>
+    <!-- RAG JavaScript -->
+    <script src="auron-rag.js"></script>
+</body>
+</html>

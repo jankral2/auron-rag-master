@@ -1,0 +1,83 @@
+services:
+  # PostgreSQL databáze s pgvector
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: auron-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - '5433:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./scripts/db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # FastAPI backend
+  api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: auron-api
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-postgres}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      SKODAGPT_ENDPOINT: ${SKODAGPT_ENDPOINT}
+      SKODAGPT_API_KEY: ${SKODAGPT_API_KEY}
+    ports:
+      - '8001:8000'
+    volumes:
+      - ./app:/app
+      - ./data:/data
+      - ./scripts:/app/scripts
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Data ingestion (run once with: docker compose --profile ingest up ingest)
+  ingest:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: auron-ingest
+    profiles: [ingest]
+    command: python scripts/ingest_data.py /data
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-postgres}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - ./data:/data
+      - ./scripts:/app/scripts
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: no
+
+  # Nginx pro HTML
+  nginx:
+    image: nginx:alpine
+    container_name: auron-nginx
+    ports:
+      - '8081:80'
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db_data:
