@@ -28,6 +28,7 @@ data/*.txt  ──► ingest_data.py      ──► PostgreSQL + pgvector
 
 - Docker & Docker Compose
 - Python 3.10+
+- Data: https://drive.google.com/drive/folders/15yOF1vz2fkFgeGap_d_pH_z6WUGu_89W
 
 ### 2. Configure environment
 
